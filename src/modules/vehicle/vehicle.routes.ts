@@ -4,6 +4,7 @@ import { vehicleControllers } from "./vehicle.controllers";
 
 const router = Router();
 
+
 router.post("/", vehicleControllers.createVehicle);
 
 router.get("/", vehicleControllers.getAllVehicles);
