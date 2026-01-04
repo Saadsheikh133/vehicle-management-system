@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { vehicleServices } from "./vehicle.services";
 
-
 const createVehicle = async (req: Request, res: Response) => {
   try {
     const result = await vehicleServices.createVehicle(req.body);
@@ -34,7 +33,60 @@ const getAllVehicles = async (req: Request, res: Response) => {
   }
 };
 
+const getSingleVehicle = async (req: Request, res: Response) => {
+  try {
+    const result = await vehicleServices.getSingleVehicle(
+      req.params.id as string
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Vehicle Not Found!!!",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "Vehicle Fetched Successfully.",
+        data: result.rows[0],
+      });
+    }
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const updateVehicle = async (req: Request, res: Response) => {
+  try {
+    const result = await vehicleServices.updateVehicle(
+      req.body,
+      req.params.id!
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Users Not Found!!!",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "Users Updated Successfully.",
+        data: result.rows[0],
+      });
+    }
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const vehicleControllers = {
-    createVehicle,
-    getAllVehicles,
-}
+  createVehicle,
+  getAllVehicles,
+  getSingleVehicle,
+  updateVehicle,
+};
