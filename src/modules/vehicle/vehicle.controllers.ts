@@ -67,13 +67,35 @@ const updateVehicle = async (req: Request, res: Response) => {
     if (result.rows.length === 0) {
       res.status(404).json({
         success: false,
-        message: "Users Not Found!!!",
+        message: "Vehicle Not Found!!!",
       });
     } else {
       res.status(200).json({
         success: true,
-        message: "Users Updated Successfully.",
+        message: "Vehicle Updated Successfully.",
         data: result.rows[0],
+      });
+    }
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const deleteVehicle = async (req: Request, res: Response) => {
+  try {
+    const result = await vehicleServices.deleteVehicle(req.params.id as string);
+    if (result.rowCount === 0) {
+      res.status(404).json({
+        success: false,
+        message: "Vehicle Not Found!!!",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "Vehicle Deleted Successfully.",
       });
     }
   } catch (error: any) {
@@ -89,4 +111,5 @@ export const vehicleControllers = {
   getAllVehicles,
   getSingleVehicle,
   updateVehicle,
+  deleteVehicle,
 };
