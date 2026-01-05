@@ -27,12 +27,17 @@ const getAllVehicles = async () => {
   return result;
 };
 
-const getSingleVehicle = async (id: string) => {
-  const result = await pool.query(`SELECT * FROM vehicles WHERE id = $1`, [id]);
+const getSingleVehicle = async (vehicleId: string) => {
+  const result = await pool.query(`SELECT * FROM vehicles WHERE id = $1`, [
+    vehicleId,
+  ]);
   return result;
 };
 
-const updateVehicle = async (payload: Record<string, unknown>, id: string) => {
+const updateVehicle = async (
+  payload: Record<string, unknown>,
+  vehicleId: string
+) => {
   const {
     vehicle_name,
     type,
@@ -45,30 +50,30 @@ const updateVehicle = async (payload: Record<string, unknown>, id: string) => {
   const values = [];
   let index = 1;
 
-   if (vehicle_name) {
-     fields.push(`vehicle_name = $${index++}`);
-     values.push(vehicle_name);
-  };
+  if (vehicle_name) {
+    fields.push(`vehicle_name = $${index++}`);
+    values.push(vehicle_name);
+  }
 
-    if (type) {
-      fields.push(`type = $${index++}`);
-      values.push(type);
-  };
+  if (type) {
+    fields.push(`type = $${index++}`);
+    values.push(type);
+  }
 
   if (registration_number) {
     fields.push(`registration_number = $${index++}`);
     values.push(registration_number);
-  };
+  }
 
   if (daily_rent_price !== undefined) {
     fields.push(`daily_rent_price = $${index++}`);
     values.push(daily_rent_price);
-  };
+  }
 
   if (availability_status) {
     fields.push(`availability_status = $${index++}`);
     values.push(availability_status);
-  };
+  }
 
   fields.push(`updated_at = CURRENT_TIMESTAMP`);
 
@@ -79,13 +84,15 @@ const updateVehicle = async (payload: Record<string, unknown>, id: string) => {
       WHERE id = $${index}
       RETURNING *;
       `,
-    [...values, id]
+    [...values, vehicleId]
   );
   return result;
 };
 
-const deleteVehicle = async (id: string) => {
-  const result = await pool.query(`DELETE FROM vehicles WHERE id = $1`, [id]);
+const deleteVehicle = async (vehicleId: string) => {
+  const result = await pool.query(`DELETE FROM vehicles WHERE id = $1`, [
+    vehicleId,
+  ]);
   return result;
 };
 

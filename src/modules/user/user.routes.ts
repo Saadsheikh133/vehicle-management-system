@@ -4,8 +4,8 @@ import { userControllers } from "./user.controllers";
 
 const router = express.Router();
 
-router.post("/auth/signup", userControllers.createUser);
+router.get("/", userControllers.getAllUsers);
 
-router.get("/users", userControllers.getAllUsers);
+router.put("/:userId", userControllers.updateUser);
 
 export const userRoutes = router;
