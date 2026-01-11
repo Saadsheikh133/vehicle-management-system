@@ -52,5 +52,5 @@ const deleteUser = async (userId: string) => {
 export const userServices = {
   getAllUsers,
   updateUser,
-  deleteUser
+  deleteUser,
 };
