@@ -5,8 +5,8 @@ import auth from "../auth/auth";
 
 const router = Router();
 
-router.post("/", bookingControllers.createBooking);
+router.post("/", auth(), bookingControllers.createBooking);
 
-router.get("/",auth(), bookingControllers.getAllBookings);
+router.get("/", auth(), bookingControllers.getAllBookings);
 
 export const bookingRoutes = router;
