@@ -5,7 +5,7 @@ const getAllUsers = async () => {
   return result;
 };
 
-const updateUser = async (payload: Record<string, unknown>, userId: string) => {
+const updateUser = async (payload: Record<string, unknown>, userId: number) => {
   const { name, email, phone, role } = payload;
   const fields = [];
   const values = [];
@@ -37,7 +37,7 @@ const updateUser = async (payload: Record<string, unknown>, userId: string) => {
     `UPDATE users
       SET ${fields.join(", ")}
       WHERE id = $${index}
-      RETURNING *;
+      RETURNING id, name, email, phone, role;
       `,
     [...values, userId]
   );

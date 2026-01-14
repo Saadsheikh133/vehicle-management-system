@@ -7,10 +7,8 @@ declare global {
       role: "admin" | "customer";
     }
     interface Request {
-      user: JwtPayload
-    }
-    interface Request {
-      user: User;
+      user: JwtPayload;
+      user?: User;
     }
   }
 }

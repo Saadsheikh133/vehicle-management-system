@@ -4,8 +4,8 @@ import { userServices } from "./user.services";
 const getAllUsers = async (req: Request, res: Response) => {
   try {
     const result = await userServices.getAllUsers();
-    if (req.user.role !== "admin") {
-      return res.status(500).json({
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({
         success: false,
         message: "You are not admin!!",
       });
@@ -24,8 +24,26 @@ const getAllUsers = async (req: Request, res: Response) => {
 };
 
 const updateUser = async (req: Request, res: Response) => {
+  const userId = Number(req.params.userId);
+  const loggedInUser = req.user;
   try {
-    const result = await userServices.updateUser(req.body, req.params.userId!);
+    // authorization check
+    const isAdmin = loggedInUser.role === "admin";
+    const isOwnProfile = loggedInUser.id === userId;
+
+    if (!isAdmin && !isOwnProfile) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to update this user",
+      });
+    }
+
+    // customer can not update role
+    if (!isAdmin && "role" in req.body) {
+      delete req.body.role;
+    }
+
+    const result = await userServices.updateUser(req.body, userId!);
     if (result.rows.length === 0) {
       res.status(404).json({
         success: false,
@@ -49,6 +67,12 @@ const updateUser = async (req: Request, res: Response) => {
 const deleteUser = async (req: Request, res: Response) => {
   try {
     const result = await userServices.deleteUser(req.params.userId as string);
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "You are not admin!!",
+      });
+    }
     if (result.rowCount === 0) {
       res.status(404).json({
         success: false,

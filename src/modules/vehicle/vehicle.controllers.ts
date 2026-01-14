@@ -3,6 +3,12 @@ import { vehicleServices } from "./vehicle.services";
 
 const createVehicle = async (req: Request, res: Response) => {
   try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "You are not admin!!",
+      });
+    }
     const result = await vehicleServices.createVehicle(req.body);
     res.status(201).json({
       success: true,
@@ -12,7 +18,7 @@ const createVehicle = async (req: Request, res: Response) => {
   } catch (err: any) {
     res.status(500).json({
       success: false,
-      message: err.message,
+      message: err.message
     });
   }
 };
@@ -60,6 +66,12 @@ const getSingleVehicle = async (req: Request, res: Response) => {
 
 const updateVehicle = async (req: Request, res: Response) => {
   try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "You are not admin!!",
+      });
+    }
     const result = await vehicleServices.updateVehicle(
       req.body,
       req.params.vehicleId!
@@ -86,6 +98,12 @@ const updateVehicle = async (req: Request, res: Response) => {
 
 const deleteVehicle = async (req: Request, res: Response) => {
   try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "You are not admin!!",
+      });
+    }
     const result = await vehicleServices.deleteVehicle(
       req.params.vehicleId as string
     );
