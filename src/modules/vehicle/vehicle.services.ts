@@ -93,6 +93,17 @@ const updateVehicle = async (
 };
 
 const deleteVehicle = async (vehicleId: string) => {
+  const activeBookings = await pool.query(
+    `
+    SELECT 1 FROM bookings
+    WHERE vehicle_id = $1 AND status = 'active'
+    `,
+    [vehicleId]
+  );
+
+  if (activeBookings.rowCount ?? 0 > 0) {
+    throw new Error("Vehicle has active bookings and cannot be deleted");
+  }
   const result = await pool.query(`DELETE FROM vehicles WHERE id = $1`, [
     vehicleId,
   ]);
