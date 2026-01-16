@@ -7,6 +7,8 @@ interface CreateBookingPayload {
   rent_end_date: string;
 }
 
+type BookingStatus = "cancelled" | "returned";
+
 const createBooking = async (payload: CreateBookingPayload) => {
   const { customer_id, vehicle_id, rent_start_date, rent_end_date } = payload;
 
@@ -72,7 +74,7 @@ const createBooking = async (payload: CreateBookingPayload) => {
         (customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status)
       VALUES
         ($1, $2, $3, $4, $5, 'active')
-      RETURNING *;
+      RETURNING id, customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status;
       `,
       [customer_id, vehicle_id, rent_start_date, rent_end_date, total_price]
     );
@@ -178,7 +180,72 @@ const getAllBookings = async (userId: number, role: "admin" | "customer") => {
   }));
 };
 
+// helper function
+const getBookingById = async (bookingId: number) => {
+  const result = await pool.query(
+    `
+    SELECT id, customer_id, vehicle_id, status
+    FROM bookings
+    WHERE id = $1
+    `,
+    [bookingId]
+  );
+
+  if (result.rowCount === 0) {
+    throw new Error("Booking not found");
+  }
+
+  return result.rows[0];
+};
+
+const updateBookingStatus = async (bookingId: number, status: BookingStatus) => {
+  // get booking
+  const getBooking = await pool.query(`
+    SELECT * FROM bookings WHERE id = $1
+    `, [bookingId]
+  );
+  if (getBooking.rowCount === 0) {
+    throw new Error("Booking not found");
+  }
+
+  const booking = getBooking.rows[0];
+
+  // update booking status
+  const updatedBookingResult = await pool.query(
+    `
+    UPDATE bookings SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id, customer_id, vehicle_id, rent_start_date, rent_end_date, total_price, status
+    `, [status, bookingId]
+  );
+
+  const updatedBooking = updatedBookingResult.rows[0];
+
+  // returned update vehicle availability check
+  let vehicle = null;
+  if (status === "returned") {
+    const vehicleResult = await pool.query(
+      `
+      UPDATE vehicles
+      SET availability_status = 'available',
+        updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1
+      RETURNING availability_status
+      `,
+      [booking.vehicle_id]
+    );
+
+    vehicle = vehicleResult.rows[0];
+
+  }
+
+  return {
+    booking: updatedBooking,
+    vehicle,
+  };
+};
+
 export const bookingServices = {
   createBooking,
   getAllBookings,
+  getBookingById,
+  updateBookingStatus,
 };
